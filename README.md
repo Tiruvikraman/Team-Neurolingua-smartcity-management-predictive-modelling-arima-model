@@ -6,3 +6,6 @@ In the face of increasing urbanization, managing a city's resources and ensuring
 
 
 video link:https://drive.google.com/drive/folders/1tdxG7lo-8USCMKkOEXkkpLccEUrX2h3v
+
+model file link:
+https://drive.google.com/drive/folders/1AS9lIVWEyzMGhODei_se8k2pjCsECadG?usp=sharing
