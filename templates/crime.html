@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anomalies</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f7f7f7;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #4CAF50;
+      margin-bottom: 40px;
+    }
+    .resource-card {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      transition: transform 0.2s ease;
+    }
+    .resource-card:hover {
+      transform: translateY(-5px);
+    }
+    .resource-card img {
+      width: 60px;
+      height: 60px;
+      margin-right: 20px;
+    }
+    .card-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .card-title {
+      font-weight: bold;
+      font-size: 1.2em;
+      color: #333;
+      margin-bottom: 5px;
+    }
+    .data-value {
+      font-size: 1em;
+      color: #777;
+    }
+    .chart-container {
+      width: 50%;
+      max-width: 300px;
+    }
+    .map-container {
+      margin-top: 40px;
+      height: 400px;
+    }
+    .area-names {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #333;
+    }
+  </style>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body>
+  <h1>Crime Rates</h1>
+  <div id="resource-cards">
+    <!-- <img src="https://www.eea.europa.eu/en/topics/in-depth/pollution/@@images/image-800-e74d04f52caa29846be648591beb2357.jpeg" alt="Pollution Image" style="width: 100%; max-width: 800px; display: block; margin: 20px auto;"> -->
+  </div>
+  
+  <div class="map-container" id="map"></div>
+  <div class="area-names" id="area-names"></div>
+
+  <script>
+    function fetchData() {
+      const resources = [
+        {
+          name: "Pollution",
+          icon: "https://www.eea.europa.eu/en/topics/in-depth/pollution/@@images/image-800-e74d04f52caa29846be648591beb2357.jpeg",
+          yesterday: {
+              "PM2.5": 18,
+              "PM10": 42,
+              "SO2": 2,
+              "CO": 344,
+              "Ozone": 5,
+              "NO2": 3
+          },
+          predicted: {
+              "PM2.5": 21,
+              "PM10": 39,
+              "SO2": 3,
+              "CO": 341,
+              "Ozone": 4.6,
+              "NO2": 4
+          },
+          unit: "",
+          data: [57, 63, 71, 84, 38, 36, 39]
+        }
+        // Add more resources here with their details
+      ];
+
+      const resourceCards = document.getElementById("resource-cards");
+
+      resources.forEach((resource, index) => {
+        const card = document.createElement("div");
+        card.classList.add("resource-card");
+
+        const img = document.createElement("img");
+        img.src = resource.icon;
+        card.appendChild(img);
+
+        const cardContent = document.createElement("div");
+        cardContent.classList.add("card-content");
+
+        const title = document.createElement("h3");
+        title.classList.add("card-title");
+        title.textContent = resource.name;
+        cardContent.appendChild(title);
+
+        const yesterdayData = document.createElement("p");
+        yesterdayData.textContent = `Yesterday: PM2.5 ${resource.yesterday["PM2.5"]}, PM10 ${resource.yesterday["PM10"]}, SO2 ${resource.yesterday["SO2"]}, CO ${resource.yesterday["CO"]}, Ozone ${resource.yesterday["Ozone"]}, NO2 ${resource.yesterday["NO2"]} ${resource.unit}`;
+        cardContent.appendChild(yesterdayData);
+
+        const predictedData = document.createElement("p");
+        predictedData.textContent = `Predicted (Next Month): PM2.5 ${resource.predicted["PM2.5"]}, PM10 ${resource.predicted["PM10"]}, SO2 ${resource.predicted["SO2"]}, CO ${resource.predicted["CO"]}, Ozone ${resource.predicted["Ozone"]}, NO2 ${resource.predicted["NO2"]} ${resource.unit}`;
+        predictedData.classList.add("data-value");
+        cardContent.appendChild(predictedData);
+
+        card.appendChild(cardContent);
+
+        const chartContainer = document.createElement("div");
+        chartContainer.classList.add("chart-container");
+        const canvas = document.createElement("canvas");
+        canvas.id = `chart-${index}`;
+        chartContainer.appendChild(canvas);
+        card.appendChild(chartContainer);
+
+        resourceCards.appendChild(card);
+
+        // Initialize the chart
+        const ctx = canvas.getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+            datasets: [{
+              label: resource.name,
+              data: resource.data,
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1,
+              fill: true
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: false
+              }
+            }
+          }
+        });
+      });
+    }
+
+    function initializeMap() {
+      const map = L.map('map').setView([11.0168, 76.9558], 13);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      const crimeAreas = [
+        { name: 'Tatabad', coordinates: [11.0175, 76.9553], description: 'High crime rate (Red Color)', color: 'red' },
+        { name: 'Vadakovai', coordinates: [11.0200, 76.9600], description: 'Frequent accidents (Blue Color)', color: 'blue' },
+        { name: 'R S Puram', coordinates: [11.0100, 76.9500], description: 'High theft incidents (Green Color)', color: 'green' }
+        // Add more areas as needed
+      ];
+
+      const areaNames = document.getElementById('area-names');
+
+      crimeAreas.forEach(area => {
+        L.circle(area.coordinates, {
+          color: area.color,
+          fillColor: area.color,
+          fillOpacity: 0.5,
+          radius: 500
+        }).addTo(map)
+        .bindPopup(`${area.name}: ${area.description}`);
+
+        const areaElement = document.createElement('p');
+        areaElement.textContent = `${area.name}: ${area.description}`;
+        areaNames.appendChild(areaElement);
+      });
+    }
+
+    fetchData();
+    window.onload = initializeMap;
+  </script>
+</body>
+</html>
