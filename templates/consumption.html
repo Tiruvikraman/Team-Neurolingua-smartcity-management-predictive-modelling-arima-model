@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resource Consumption Monitor</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f7f7f7;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #4CAF50;
+      margin-bottom: 40px;
+    }
+    .resource-card {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      transition: transform 0.2s ease;
+    }
+    .resource-card:hover {
+      transform: translateY(-5px);
+    }
+    .resource-card img {
+      width: 60px;
+      height: 60px;
+      margin-right: 20px;
+    }
+    .card-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .card-title {
+      font-weight: bold;
+      font-size: 1.2em;
+      color: #333;
+      margin-bottom: 5px;
+    }
+    .data-value {
+      font-size: 1em;
+      color: #777;
+    }
+    .chart-container {
+      width: 50%;
+      max-width: 300px;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>Resource Consumption</h1>
+  <div id="resource-cards"></div>
+
+  <script>
+    function fetchData() {
+      const resources = [
+        { name: "Electricity", icon: "https://tse2.mm.bing.net/th?id=OIP.P0l-1JOWeSE5wOiEl330nwHaE8&pid=Api&P=0&h=180", yesterday: 20, predicted: 710, unit: "MU(Million Units)", data: [21,24,25,22.5,27,22, 33] },
+        { name: "Water", icon: "https://tse4.mm.bing.net/th?id=OIP.J8BXZ8074m8ZjuF4MvyEOAHaEo&pid=Api&P=0&h=180", yesterday: 192, predicted: 3698, unit: "Million Liters", data: [198,193,215,206,214,200,219]},
+        { name: "Gas", icon: "https://tse1.mm.bing.net/th?id=OIP._hBmzH3K0lyTsy6dbvqHkwHaE8&pid=Api&P=0&h=180", yesterday: 179, predicted: 4982, unit: "kilo m³", data: [175,176,174,177,175,147,190] },
+        { name: "Internet", icon: "https://tse1.mm.bing.net/th?id=OIP.Kja0BM8dhPYwEQVtvCG1nQHaEK&pid=Api&P=0&h=180", yesterday: 1.38, predicted: 34.9, unit: "PB", data: [1.22,1.38,1.24,1.24,1.36,1.35,2.78] },
+        { name: "Waste", icon: "https://tse3.mm.bing.net/th?id=OIP.2mziTjydlV4mb4rniMUKsgHaE8&pid=Api&P=0&h=180", yesterday: 864, predicted: 21850, unit: "metric tons", data: [874,859,847,841,853,864,845] },
+        // Add more resources here with their details
+      ];
+
+      const resourceCards = document.getElementById("resource-cards");
+
+      resources.forEach((resource, index) => {
+        const card = document.createElement("div");
+        card.classList.add("resource-card");
+
+        const img = document.createElement("img");
+        img.src = resource.icon;
+        card.appendChild(img);
+
+        const cardContent = document.createElement("div");
+        cardContent.classList.add("card-content");
+
+        const title = document.createElement("h3");
+        title.classList.add("card-title");
+        title.textContent = resource.name;
+        cardContent.appendChild(title);
+
+        const yesterdayData = document.createElement("p");
+        yesterdayData.textContent = `Yesterday: ${resource.yesterday} ${resource.unit}`;
+        cardContent.appendChild(yesterdayData);
+
+        const predictedData = document.createElement("p");
+        predictedData.textContent = `Predicted (Next Month(July)): ${resource.predicted} ${resource.unit}`;
+        predictedData.classList.add("data-value");
+        cardContent.appendChild(predictedData);
+
+        card.appendChild(cardContent);
+
+        const chartContainer = document.createElement("div");
+        chartContainer.classList.add("chart-container");
+        const canvas = document.createElement("canvas");
+        canvas.id = `chart-${index}`;
+        chartContainer.appendChild(canvas);
+        card.appendChild(chartContainer);
+
+        resourceCards.appendChild(card);
+
+        // Initialize the chart
+        const ctx = canvas.getContext('2d');
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+            datasets: [{
+              label: resource.name,
+              data: resource.data,
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1,
+              fill: true
+            }]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: false
+              }
+            }
+          }
+        });
+      });
+    }
+
+    fetchData();
+  </script>
+</body>
+</html>
